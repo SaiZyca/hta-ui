@@ -1,0 +1,399 @@
+<!-- :: Batch section
+@echo off
+setlocal
+
+echo Select an option:
+for /F "delims=" %%a in ('mshta.exe "%~F0"') do set "HTAreply=%%a"
+echo End of HTA window, reply: "%HTAreply%"
+pause>nul
+goto :EOF
+
+-->
+
+<HTML>
+
+<HEAD>
+    <HTA:APPLICATION APPLICATIONNAME="Image Convertor" SCROLL="no" SingleInstance="Yes" SYSMENU="yes" Selection="No"
+        ContextMenu="No">
+        <link href="bootstrap.min.css" rel="stylesheet" type="text/css">
+        <!-- <link href="style.css" rel="stylesheet" type="text/css"> -->
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <!-- <meta http-equiv="x-ua-compatible" content="ie=11"> -->
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta http-equiv="content-script-type" content="text/javascript" />
+        <TITLE>Convertor</TITLE>
+        <!-- css block -->
+        <style>
+            .slider {
+                /* Chrome, Edge */
+                -webkit-appearance: none;
+            }
+        
+            .slider:focus {
+                /* Eliminates focus on Chrome, Edge */
+                outline: none;
+            }
+        
+            .slider::-webkit-slider-runnable-track {
+                /* Chrome, Edge */
+                background: rgb(239, 239, 239);
+                border: 1px solid rgb(178, 178, 178);
+                border-radius: 25px;
+                cursor: pointer;
+                height: 8px;
+            }
+        
+            .slider::-webkit-slider-thumb {
+                /* Chrome, Edge thumb */
+                -webkit-appearance: none;
+                background: rgb(7, 114, 251);
+                border: 0px;
+                border-radius: 16px;
+                cursor: pointer;
+                height: 16px;
+                margin-top: -5px;
+                width: 16px;
+            }
+        
+
+            .slider::-ms-track {
+                /* IE Range track */
+                background: transparent;
+                border-color: transparent;
+                border-width: 5px 0;
+                /* allows taller thumb */
+                color: transparent;
+                height: 8px;
+                
+            }
+        
+            .slider::-ms-thumb {
+                /* Thumb */
+                background: rgb(7, 114, 251);
+                border: 0px;
+                border-radius: 16px;
+                height: 16px;
+                width: 16px;
+            }
+        
+            .slider::-ms-fill-lower {
+                /* IE Range lower fill */
+                background: rgb(7, 114, 251);
+                border: 1px solid rgb(62, 116, 184);
+                border-radius: 50px;
+            }
+        
+            .slider::-ms-fill-upper {
+                /* IE Range upper fill */
+                background: rgb(239, 239, 239);
+                border: 1px solid rgb(178, 178, 178);
+                border-radius: 50px;
+            }
+        
+            .slider::-ms-tooltip {
+                /* IE Range upper fill */
+                display: none;
+            }
+        
+            .space {
+                height: 5px;
+            }
+        
+            .select-expanded {
+                display: table-cell;
+                height: 36px;
+            }
+        
+            .select-expanded option {
+                display: table-cell;
+            }
+        
+            .lr_div {
+                display: flex;
+                justify-content: space-between;
+                width: 100%;
+                /* border: .1rem red solid; */
+            }
+        
+            .space {
+                height: 5px;
+            }
+        </style>
+        <!-- javascript block -->
+        <SCRIPT language="JavaScript">
+            function convertHTA(reply) {
+                var fso = new ActiveXObject("Scripting.FileSystemObject");
+                fso.GetStandardStream(1).WriteLine(reply);
+                window.close();
+            }
+            function get_magick_exe(path) {
+                var fso, exe_path = './App/ImageMagic/magick.exe';
+                fso = new ActiveXObject("Scripting.FileSystemObject");
+                if (fso.FileExists(exe_path)) {
+                    var msg = fso.GetAbsolutePathName(exe_path);
+                    document.getElementById('magick_exe_msg').innerHTML = msg;
+                    document.getElementById('magick_exe_msg').classList.remove('btn-danger');
+                    document.getElementById('magick_exe_msg').classList.add('btn-success');
+                    // document.getElementById('magick_exe').innerHTML = msg;
+                }
+                else if (fso.FileExists('magick.exe')){
+                    var msg = fso.GetAbsolutePathName(exe_path);
+                    document.getElementById('magick_exe_msg').innerHTML = msg;
+                    document.getElementById('magick_exe_msg').classList.remove('btn-danger');
+                    document.getElementById('magick_exe_msg').classList.add('btn-success');
+                }
+                else if (fso.FileExists(path)){
+                    var msg = fso.GetAbsolutePathName(exe_path);
+                    document.getElementById('magick_exe_msg').innerHTML = msg;
+                    document.getElementById('magick_exe_msg').classList.remove('btn-danger');
+                    document.getElementById('magick_exe_msg').classList.add('btn-success');
+                }
+                else {
+                    var msg = "點擊設定 magick.exe 路徑";
+                    document.getElementById('magick_exe_msg').innerHTML = msg;
+                    document.getElementById('magick_exe_msg').classList.add('btn-danger');
+                    document.getElementById('magick_exe_msg').classList.remove('btn-success');
+                }
+            }
+            function closeHTA(reply) {
+                window.close();
+            }
+            function update_png_compress() {
+                document.getElementById('png-compress-label').innerHTML = document.getElementById('png-compress').value + "%";
+            }
+            function update_jpg_compress() {
+                document.getElementById('jpg-compress-label').innerHTML = document.getElementById('jpg-compress').value + "%";
+            }
+            function format_option(){
+                var format = document.getElementById('export-format').value;
+                if (format == "exr"){
+                    document.getElementById('options-exr').style.display = 'block';
+                    document.getElementById('options-png').style.display = 'none';
+                    document.getElementById('options-jpg').style.display = 'none';
+                }
+                else if (format == "png"){
+                    document.getElementById('options-exr').style.display = 'none';
+                    document.getElementById('options-png').style.display = 'block';
+                    document.getElementById('options-jpg').style.display = 'none';
+                }
+                else if (format == "jpg"){
+                    document.getElementById('options-exr').style.display = 'none';
+                    document.getElementById('options-png').style.display = 'none';
+                    document.getElementById('options-jpg').style.display = 'block';
+                }
+            }
+            function start_convert(){
+                var app_path = document.getElementById('magick_exe_msg').innerHTML;
+                var magick_command = " convert "
+                var file_list = document.getElementById('files_picker').value.split(",");
+                var export_format = document.getElementById('export-format').value;
+                var output_list = file_list.slice();
+                for (var i = 0; i < output_list.length; i++) {
+                    var file_ext = output_list[i].split('.').pop();
+                    output_list[i] = output_list[i].replace(file_ext, export_format);
+                }
+                
+                WshShell = new ActiveXObject("WScript.Shell");
+                document.getElementById('convert_progress').value = 0
+                document.getElementById('convert_progress').max = file_list.length;
+
+                if (export_format == "exr"){
+                    var channel = document.getElementById('exr-export-channel').value;
+                    var depth = document.getElementById('exr-export-depth').value;
+                    var codec = document.getElementById('exr-export-codec').value;
+
+                    for (var i = 0; i < file_list.length; i++) {
+                        var command = app_path + magick_command + file_list[i] + channel + depth + codec + output_list[i];
+                        WshShell.Run(command, 0, true);
+                        document.getElementById('msg').innerHTML = command;
+                        document.getElementById('convert_progress').value += 1;
+                    }
+                }
+                else if (export_format == "png"){
+                    var channel = document.getElementById('png-export-channel').value;
+                    var depth = document.getElementById('png-export-depth').value;
+                    var compress = " -quality " + document.getElementById('png-compress').value + " ";
+
+                    for (var i = 0; i < file_list.length; i++) {
+                        var command = app_path + magick_command + file_list[i] + channel + depth + compress + output_list[i];
+                        WshShell.Run(command, 0, true);
+                        document.getElementById('msg').innerHTML = command;
+                        document.getElementById('convert_progress').value += 1;
+                    }
+                }
+                else if (export_format == "jpg"){
+                    var channel = document.getElementById('jpg-export-channel').value;
+                    var compress = " -quality " + document.getElementById('jpg-compress').value + " ";
+
+                    for (var i = 0; i < file_list.length; i++) {
+                        var command = app_path + magick_command + file_list[i] + channel + compress + output_list[i];
+                        WshShell.Run(command, 0, true);
+                        document.getElementById('msg').innerHTML = command;
+                        document.getElementById('convert_progress').value += 1;
+                    }
+                }
+
+
+            }
+            window.resizeTo(580, 520);
+            window.moveTo(500, 300);
+            window.onload = function(){
+                format_option();
+                get_magick_exe();
+            } 
+        </SCRIPT>
+</HEAD>
+
+<BODY>
+
+</BODY>
+<div class="container" style="padding: 5px;">
+    <h2 class="text-center"> Image Convertor</h2>
+    <div class="container">
+        <div class="row">
+            <div class="col-3" style="padding-top: 12px;">
+                magick.exe 路徑 :
+            </div>
+            <div class="col-9" style="padding-top: 5px;">
+                <label for="magick_exe" class="form-label btn btn-danger" id="magick_exe_msg" style="width: 100%;">點擊設定
+                    magick.exe 路徑</label>
+                <input class="form-control" type="file" id="magick_exe" accept=".exe, " hidden onchange="get_magick_exe(value);">
+            </div>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">選擇要轉換的檔案</label>
+        <input class="form-control" type="file" id="files_picker" multiple accept="image/*, .tif, .hdr, .exr, ">
+    </div>
+    <div class="container" name="format">
+        <div class="row align-items-start">
+            <div class="col" style="text-align: right; padding-top: 5px;">
+                Format :
+            </div>
+            <div class="col">
+                <select class="form-select" id="export-format" onchange="format_option();">
+                    <option value="exr">EXR</option>
+                    <option value="png">PNG</option>
+                    <option value="jpg">JPG</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="space"></div>
+    <!-- options-exr -->
+    <div class="container" id="options-exr">
+        <div class="row align-items-start">
+            <div class="col" style="text-align: right; padding-top: 5px;">
+                channel :
+            </div>
+            <div class="col">
+                <select class="form-select" id="exr-export-channel">
+                    <option value=" -alpha off ">RGB</option>
+                    <option value=" -alpha on ">RGBA</option>
+                    <option value=" -set colorspace Gray -separate -average ">BW</option>
+                </select>
+            </div>
+        </div>
+        <div class="space"></div>
+        <div class="row align-items-start">
+            <div class="col" style="text-align: right; padding-top: 5px;">
+                Color Depth :
+            </div>
+            <div class="col">
+                <select class="form-select" id="exr-export-depth">
+                    <option value=" -depth 16 ">Float (Half)</option>
+                    <option value=" -depth 32 ">Float (Full)</option>
+                </select>
+            </div>
+        </div>
+        <div class="space"></div>
+        <div class="row align-items-start">
+            <div class="col" style="text-align: right; padding-top: 5px;">
+                Codec :
+            </div>
+            <div class="col">
+                <select class="form-select" id="exr-export-codec">
+                    <option value=" -compress dwaa ">DWAA</option>
+                    <option value=" -compress dwab ">DWAB</option>
+                    <option value=" -compress zip ">ZIP</option>
+                    <option value=" -compress piz ">PIZ</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <!-- options-png -->
+    <div class="container" id="options-png">
+        <div class="row align-items-start">
+            <div class="col" style="text-align: right; padding-top: 5px;">
+                channel :
+            </div>
+            <div class="col">
+                <select class="form-select" id="png-export-channel">
+                    <option value=" -alpha off ">RGB</option>
+                    <option value=" -alpha on ">RGBA</option>
+                    <option value=" -set colorspace Gray -separate -average ">BW</option>
+                </select>
+            </div>
+        </div>
+        <div class="space"></div>
+        <div class="row align-items-start">
+            <div class="col" style="text-align: right; padding-top: 5px;">
+                Color Depth :
+            </div>
+            <div class="col">
+                <select class="form-select" id="png-export-depth">
+                    <option value=" -depth 8 ">8</option>
+                    <option value=" -depth 16 ">16</option>
+                </select>
+            </div>
+        </div>
+        <div class="space"></div>
+        <div class="row align-items-start">
+            <div class="col" style="text-align: right; padding-top: 5px;">
+                Quality :
+            </div>
+            <div class="col">
+                <input type="range" min="1" max="100" value="75" class="slider" id="png-compress"
+                    onchange="update_png_compress();" style="width:80%;"><span id="png-compress-label" style="padding-left: 10px;">75%</span>
+            </div>
+        </div>
+    </div>
+    <!-- options-jpg -->
+    <div class="container" id="options-jpg">
+        <div class="row align-items-start">
+            <div class="col" style="text-align: right; padding-top: 5px;">
+                channel :
+            </div>
+            <div class="col">
+                <select class="form-select" id="jpg-export-channel">
+                    <option value=" -alpha off ">RGB</option>
+                    <option value=" -set colorspace Gray -separate -average ">BW</option>
+                </select>
+            </div>
+        </div>
+        <div class="space"></div>
+        <div class="row align-items-start">
+            <div class="col" style="text-align: right; padding-top: 5px;">
+                Quality :
+            </div>
+            <div class="col">
+                <input type="range" min="1" max="100" value="90" class="slider" id="jpg-compress"
+                    onchange="update_jpg_compress();" style="width:80%;"><span id="jpg-compress-label" style="padding-left: 10px;">90%</span>
+            </div>
+        </div>
+    </div>
+    <!-- --- -->
+    <div class="space"></div>
+    <div class="container">
+        <div class="lr_div">
+            <button id="btn-convert" name="btn-convert" class="btn btn-success" onclick="start_convert();">Convert</button>
+            <button id="btn-cancel" name="btn-cancel" class="btn btn-danger" onclick="closeHTA()">Exit</button>
+        </div>
+        <div class="space"></div>
+        <progress id="convert_progress" value="0" max="100" style="width: 100%; height: 32px;"></progress>
+        <div><label id="msg">message</label></div>
+    </div>
+</div>
+
+
+</HTML>
